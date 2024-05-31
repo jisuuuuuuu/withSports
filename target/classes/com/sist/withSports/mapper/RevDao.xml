@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.withSports.dao.RevDao">
+  <!-- ResultMap -->
+  <resultMap id="revResultMap" type="com.sist.withSports.model.Rev">
+  	<id column="REV_SEQ" property="revSeq" />
+  	<result column="REV_TITLE" property="revTitle"/>
+  	<result column="REV_CONTENT" property="revContent"/>
+  	<result column="NM_ID" property="nmId"/>
+  	<result column="NM_NAME" property="nmName"/>
+  	<result column="CO_ID" property="coId"/>
+  	<result column="CO_NAME" property="coName"/>
+  	<result column="NM_NICKNAME" property="nmNickname"/>
+  	<result column="REV_READ_CNT" property="revReadCnt"/>
+  	<result column="REV_REG_DATE" property="revRegDate"/>
+  </resultMap>
+  
+  <resultMap id="revFileResultMap" type="com.sist.withSports.model.RevFile">
+		<id column="REV_SEQ" property="revSeq" />
+		<id column="REV_FILE_SEQ" property="revFileSeq" />
+		<result column="REV_FILE_ORG_NAME" property="revFileOrgName" />
+		<result column="REV_FILE_NAME" property="revFileName" />
+		<result column="REV_FILE_EXT" property="revFileExt" />
+		<result column="FILE_SIZE" property="revFileSize" />
+		<result column="REV_FILE_SIZE" property="revRegDate" />
+  </resultMap>
+  
+  <resultMap id="revReplyResultMap" type="com.sist.withSports.model.RevReply">
+		<id column="REPLY_SEQ" property="replySeq" />
+		<id column="REV_SEQ" property="revSeq" />
+		<result column="NM_ID" property="nmId" />
+		<result column="REPLY_CONTENT" property="replyContent" />
+		<result column="REPLY_GROUP" property="replyGroup" />
+		<result column="REPLY_ORDER" property="replyOrder" />
+		<result column="REPLY_INDENT" property="replyIndent" />
+		<result column="REPLY_REG_DATE" property="replyRegDate" />
+		<result column="REPLY_PARENT" property="replyParent" />
+		<result column="CO_ID" property="coId" />
+		<result column="NM_NICKNAME" property="nmNickname"/>
+		<result column="CO_NAME" property="coName"/>
+  </resultMap>
+	    
+  <select id="revList" parameterType="com.sist.withSports.model.Rev" resultMap="revResultMap">
+	SELECT REV_SEQ,
+		       REV_TITLE,
+		       REV_CONTENT,
+		       NM_ID,
+		       NM_NAME,
+		       NM_NICKNAME,
+	           CO_ID,
+	           CO_NAME,
+		       REV_READ_CNT,
+		       REV_REG_DATE
+		  FROM (SELECT ROWNUM RNUM,
+		               REV_SEQ,
+		               REV_TITLE,
+		               REV_CONTENT,
+		               NM_ID,
+		               NM_NAME,
+		               NM_NICKNAME,
+	                   CO_ID,
+	                   CO_NAME,
+		               REV_READ_CNT,
+		               REV_REG_DATE
+		          FROM (SELECT A.REV_SEQ REV_SEQ,
+		                       NVL(A.REV_TITLE, '') REV_TITLE,
+		                       NVL(A.REV_CONTENT, '') REV_CONTENT,
+		                       NVL(A.NM_ID, '') NM_ID,
+		                       NVL(B.NM_NAME, '') NM_NAME,
+		                       NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+	                           NVL(A.CO_ID, '') CO_ID,
+	                           NVL(C.CO_NAME, '') CO_NAME,
+		                       NVL(A.REV_READ_CNT, 0) REV_READ_CNT,
+		                       NVL(TO_CHAR(A.REV_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') REV_REG_DATE
+		                  FROM SP_REV A, SP_NM_USER B, SP_CO_USER C
+		                 WHERE A.NM_ID = B.NM_ID
+	                       AND A.CO_ID = C.CO_ID
+				<if test='searchType != null and searchType != "" and searchValue != null and searchValue != ""'>
+			    		<choose>
+			    		<when test='searchType == "1"'>
+		                   AND B.NM_NICKNAME LIKE '%' || #{searchValue} || '%'
+		                </when>
+	      				<when test='searchType == "2"'>
+		                   AND A.REV_TITLE LIKE '%' || #{searchValue} || '%'
+		                </when>
+	      				<when test='searchType == "3"'>
+		                   AND DBMS_LOB.INSTR(A.REV_CONTENT, #{searchValue}) > 0
+		                </when>
+	      				</choose>
+	    		</if>
+		                 ORDER BY A.REV_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+		   AND RNUM <![CDATA[<=]]> #{endRow}
+  </select>
+  
+  <select id="revCoList" parameterType="com.sist.withSports.model.Rev" resultMap="revResultMap">
+  	SELECT REV_SEQ,
+		       REV_TITLE,
+		       REV_CONTENT,
+		       NM_ID,
+		       NM_NAME,
+		       NM_NICKNAME,
+	           CO_ID,
+	           CO_NAME,
+		       REV_READ_CNT,
+		       REV_REG_DATE
+		  FROM (SELECT ROWNUM RNUM,
+		               REV_SEQ,
+		               REV_TITLE,
+		               REV_CONTENT,
+		               NM_ID,
+		               NM_NAME,
+		               NM_NICKNAME,
+	                   CO_ID,
+	                   CO_NAME,
+		               REV_READ_CNT,
+		               REV_REG_DATE
+		          FROM (SELECT A.REV_SEQ REV_SEQ,
+		                       NVL(A.REV_TITLE, '') REV_TITLE,
+		                       NVL(A.REV_CONTENT, '') REV_CONTENT,
+		                       NVL(A.NM_ID, '') NM_ID,
+		                       NVL(B.NM_NAME, '') NM_NAME,
+		                       NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+	                           NVL(A.CO_ID, '') CO_ID,
+	                           NVL(C.CO_NAME, '') CO_NAME,
+		                       NVL(A.REV_READ_CNT, 0) REV_READ_CNT,
+		                       NVL(TO_CHAR(A.REV_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') REV_REG_DATE
+		                  FROM SP_REV A, SP_NM_USER B, SP_CO_USER C
+		                 WHERE A.NM_ID = B.NM_ID
+	                       AND A.CO_ID = C.CO_ID
+                           AND A.NM_ID = 'co'
+		                 ORDER BY A.REV_SEQ DESC))
+  </select>
+  
+  <select id="revListCnt" parameterType="com.sist.withSports.model.Rev" resultType="long">
+  	SELECT COUNT(REV_SEQ) CNT
+	  FROM SP_REV A, SP_NM_USER B
+	 WHERE A.NM_ID = B.NM_ID
+	   <if test='searchType != null and searchType != "" and searchValue != null and searchValue != ""'>
+			<choose>
+			<when test='searchType == "1"'>
+              AND B.NM_NICKNAME LIKE '%' || #{searchValue} || '%'
+           	</when>
+			<when test='searchType == "2"'>
+              AND A.REV_TITLE LIKE '%' || #{searchValue} || '%'
+           	</when>
+			<when test='searchType == "3"'>
+              AND DBMS_LOB.INSTR(A.REV_CONTENT, #{searchValue}) > 0
+           </when>
+				</choose>
+		</if>
+  </select>
+  
+  <select id="revCoListCnt" parameterType="String" resultType="long">
+  	SELECT COUNT(REV_SEQ) CNT
+	  FROM SP_REV
+	 WHERE NM_ID = 'co'
+  </select>
+  
+  <select id="revView" parameterType="long" resultMap="revResultMap">
+  	SELECT A.REV_SEQ REV_SEQ,
+	       NVL(A.REV_TITLE, '') REV_TITLE,
+	       NVL(A.REV_CONTENT, '') REV_CONTENT,
+	       NVL(A.NM_ID, '') NM_ID,
+	       NVL(B.NM_NAME, '') NM_NAME,
+           NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+           NVL(A.CO_ID, '') CO_ID,
+           NVL(C.CO_NAME, '') CO_NAME,
+	       NVL(A.REV_READ_CNT, 0) REV_READ_CNT,
+	       NVL(TO_CHAR(A.REV_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') REV_REG_DATE
+	  FROM SP_REV A, SP_NM_USER B, SP_CO_USER C
+	 WHERE A.NM_ID = B.NM_ID
+	   AND A.CO_ID = C.CO_ID
+	   AND REV_SEQ = #{value}
+  </select>
+  
+  <insert id="revInsert" parameterType="com.sist.withSports.model.Rev">
+  	<selectKey resultType="long" keyProperty="revSeq" order="BEFORE">
+		SELECT SEQ_REV_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+  	INSERT INTO SP_REV (
+	    REV_SEQ,
+	    REV_TITLE,
+	    REV_CONTENT,
+	    NM_ID,
+	    CO_ID,
+	    REV_READ_CNT,
+	    REV_REG_DATE
+	) VALUES (
+	    #{revSeq},
+	    #{revTitle},
+	    #{revContent},
+	    #{nmId},
+	    #{coId},
+	    0,
+	    SYSDATE
+	)
+  </insert>
+  
+  <insert id="revFileInsert" parameterType="com.sist.withSports.model.RevFile">
+  	INSERT INTO SP_REV_FILE (
+	    REV_SEQ,
+	    REV_FILE_SEQ,
+	    REV_FILE_ORG_NAME,
+	    REV_FILE_NAME,
+	    REV_FILE_EXT,
+	    REV_FILE_SIZE,
+	    REV_REG_DATE
+	) VALUES (
+	    #{revSeq},
+	    #{revFileSeq},
+	    #{revFileOrgName},
+	    #{revFileName},
+	    #{revFileExt},
+	    #{revFileSize},
+	    SYSDATE
+	)
+  </insert>
+  
+  <select id="revFileSelect" parameterType="long" resultMap="revFileResultMap">
+  	SELECT REV_SEQ,
+	       REV_FILE_SEQ,
+	       NVL(REV_FILE_ORG_NAME, '') REV_FILE_ORG_NAME,
+	       NVL(REV_FILE_NAME, '') REV_FILE_NAME,
+	       NVL(REV_FILE_EXT, '') REV_FILE_EXT,
+	       NVL(REV_FILE_SIZE, '') REV_FILE_SIZE,
+	       NVL(TO_CHAR(REV_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'), '') REV_REG_DATE
+	  FROM SP_REV_FILE
+	 WHERE REV_SEQ = #{value}
+	   AND REV_FILE_SEQ = 1
+  </select>
+  
+  <update id="revReadCntUp" parameterType="long">
+  	UPDATE SP_REV
+	   SET REV_READ_CNT = REV_READ_CNT + 1
+	 WHERE REV_SEQ = #{value}
+  </update>
+  
+  <!-- 첨부파일 삭제 -->
+  <delete id="revFileDelete" parameterType="long">
+  	DELETE FROM SP_REV_FILE
+	 WHERE REV_SEQ = #{value}
+  </delete>
+  
+  <!-- 후기게시글 업데이트 -->
+  <update id="revUpdate" parameterType="com.sist.withSports.model.Rev">
+  	UPDATE SP_REV
+	   SET REV_TITLE = #{revTitle},
+	       REV_CONTENT = #{revContent}
+	 WHERE REV_SEQ = #{revSeq}
+  </update>
+  
+  <!-- 후기게시글 삭제 -->
+  <delete id="revDelete" parameterType="long">
+  	DELETE FROM SP_REV
+	 WHERE REV_SEQ = #{value}
+  </delete>
+  
+  <!-- 조회... -->
+  <select id="revSelect" parameterType="long" resultMap="revResultMap">
+  	SELECT REV_SEQ,
+	       CO_ID,
+	       NM_ID
+	  FROM SP_REV
+	 WHERE REV_SEQ = #{value}
+  </select>
+  
+  
+  <select id="myRevList" parameterType="com.sist.withSports.model.Rev" resultMap="revResultMap">
+  	SELECT REV_SEQ,
+	       REV_TITLE,
+	       REV_CONTENT,
+	       NM_ID,
+	       NM_NAME,
+	       NM_NICKNAME,
+	       REV_READ_CNT,
+	       REV_REG_DATE
+	  FROM (SELECT ROWNUM RNUM,
+	               REV_SEQ,
+	               REV_TITLE,
+	               REV_CONTENT,
+	               NM_ID,
+	               NM_NAME,
+	               NM_NICKNAME,
+	               REV_READ_CNT,
+	               REV_REG_DATE
+	          FROM (SELECT A.REV_SEQ REV_SEQ,
+	                       NVL(A.REV_TITLE, '') REV_TITLE,
+	                       NVL(A.REV_CONTENT, '') REV_CONTENT,
+	                       NVL(A.NM_ID, '') NM_ID,
+	                       NVL(B.NM_NAME, '') NM_NAME,
+	                       NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+	                       NVL(A.REV_READ_CNT, 0) REV_READ_CNT,
+	                       NVL(TO_CHAR(A.REV_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') REV_REG_DATE
+	                  FROM SP_REV A, SP_NM_USER B
+	                 WHERE A.NM_ID = B.NM_ID
+	                   AND B.NM_ID = #{nmId}
+	                 ORDER BY A.REV_SEQ DESC))
+	 WHERE RNUM <![CDATA[>=]]> #{startRow}
+	   AND RNUM <![CDATA[<=]]> #{endRow}
+  </select>
+  
+  <select id="revNmListCnt" parameterType="String" resultType="long">
+  	SELECT COUNT(REV_SEQ) CNT
+	  FROM SP_REV A, SP_NM_USER B
+	 WHERE A.NM_ID = B.NM_ID
+	   AND A.NM_ID = #{value}
+  </select>
+
+  <!-- 댓글달기 -->
+  <insert id="revReplyInsert" parameterType="com.sist.withSports.model.RevReply">
+  	<selectKey resultType="long" keyProperty="replySeq" order="BEFORE">
+		SELECT SEQ_REV_REPLY_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+  	INSERT INTO SP_REV_REPLY (
+	    REPLY_SEQ,
+	    REV_SEQ,
+	    NM_ID,
+	    REPLY_CONTENT,
+	    REPLY_GROUP,
+	    REPLY_ORDER,
+	    REPLY_INDENT,
+	    REPLY_REG_DATE,
+	    REPLY_PARENT,
+	    CO_ID
+	) VALUES (
+	    #{replySeq},
+	    #{revSeq},
+	    #{nmId},
+	    #{replyContent},
+	    #{replySeq},
+	    #{replyOrder},
+	    #{replyIndent},
+	    SYSDATE,
+	    #{replyParent},
+	    #{coId}
+	)
+  </insert>
+  
+  <!-- 댓글 조회 -->
+  <select id="revReplyList" parameterType="long" resultMap="revReplyResultMap">
+  	SELECT REPLY_SEQ,
+	       NVL(REV_SEQ, 0) REV_SEQ,
+	       NVL(A.NM_ID, '') NM_ID,
+	       NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+	       NVL(REPLY_CONTENT, '') REPLY_CONTENT,
+	       NVL(REPLY_GROUP, 0) REPLY_GROUP,
+	       NVL(REPLY_ORDER, 0) REPLY_ORDER,
+	       NVL(REPLY_INDENT, 0) REPLY_INDENT,
+	       NVL(TO_CHAR(REPLY_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),  '') REPLY_REG_DATE,
+	       NVL(REPLY_PARENT, 0) REPLY_PARENT,
+	       NVL(A.CO_ID, '') CO_ID,
+	       NVL(C.CO_NAME, '') CO_NAME
+	  FROM SP_REV_REPLY A, SP_NM_USER B, SP_CO_USER C
+	 WHERE A.NM_ID = B.NM_ID
+	   AND A.CO_ID = C.CO_ID
+	   AND REV_SEQ = #{value}
+	 ORDER BY REPLY_GROUP ASC, REPLY_ORDER ASC
+  </select>
+  
+  <!-- ORDER 수정 -->
+  <update id="boardGroupOrderUpdate" parameterType="com.sist.withSports.model.RevReply">
+  	UPDATE SP_REV_REPLY
+	   SET REPLY_ORDER = REPLY_ORDER + 1
+	 WHERE REPLY_GROUP = #{replyGroup}
+	   AND REPLY_ORDER <![CDATA[>=]]> #{replyOrder}
+  </update>
+  
+  <!-- 대댓글달기 -->
+  <insert id="revReplyInsert2" parameterType="com.sist.withSports.model.RevReply">
+  	<selectKey resultType="long" keyProperty="replySeq" order="BEFORE">
+		SELECT SEQ_REV_REPLY_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+  	INSERT INTO SP_REV_REPLY (
+	    REPLY_SEQ,
+	    REV_SEQ,
+	    NM_ID,
+	    REPLY_CONTENT,
+	    REPLY_GROUP,
+	    REPLY_ORDER,
+	    REPLY_INDENT,
+	    REPLY_REG_DATE,
+	    REPLY_PARENT,
+	    CO_ID
+	) VALUES (
+	    #{replySeq},
+	    #{revSeq},
+	    #{nmId},
+	    #{replyContent},
+	    #{replyGroup},
+	    #{replyOrder},
+	    #{replyIndent},
+	    SYSDATE,
+	    #{replyParent},
+	    #{coId}
+	)
+  </insert>
+  
+  <select id="revReplySelect" parameterType="long" resultMap="revReplyResultMap">
+  	SELECT REPLY_SEQ,
+	       NVL(REV_SEQ, 0) REV_SEQ,
+	       NVL(A.NM_ID, '') NM_ID,
+	       NVL(B.NM_NICKNAME, '') NM_NICKNAME,
+	       NVL(REPLY_CONTENT, '') REPLY_CONTENT,
+	       NVL(REPLY_GROUP, 0) REPLY_GROUP,
+	       NVL(REPLY_ORDER, 0) REPLY_ORDER,
+	       NVL(REPLY_INDENT, 0) REPLY_INDENT,
+	       NVL(TO_CHAR(REPLY_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),  '') REPLY_REG_DATE,
+	       NVL(REPLY_PARENT, 0) REPLY_PARENT,
+	       NVL(A.CO_ID, '') CO_ID,
+	       NVL(C.CO_NAME, '') CO_NAME
+	  FROM SP_REV_REPLY A, SP_NM_USER B, SP_CO_USER C
+	 WHERE A.NM_ID = B.NM_ID
+	   AND A.CO_ID = C.CO_ID
+	   AND REPLY_SEQ = #{value}
+  </select>
+  
+  <update id="revReplyUpdate" parameterType="com.sist.withSports.model.RevReply">
+  	UPDATE SP_REV_REPLY
+	SET REPLY_CONTENT = #{replyContent}
+	WHERE REPLY_SEQ = #{replySeq}
+  </update>
+  
+  <delete id="revReplyDelete" parameterType="long">
+  	DELETE FROM SP_REV_REPLY
+	WHERE REPLY_SEQ = #{value}
+  </delete>
+  
+  <select id="revReplyAnswersCount" parameterType="long" resultType="long">
+  	SELECT COUNT(REPLY_SEQ)
+	  FROM SP_REV_REPLY
+	 WHERE REPLY_PARENT = #{value}
+  </select>
+
+</mapper>

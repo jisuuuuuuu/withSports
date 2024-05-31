@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.withSports.dao.PromDao">
+	<!-- ResultMap -->
+	<resultMap id="promResultMap" type="com.sist.withSports.model.Prom">
+		<id column="PROM_SEQ" property="promSeq" />
+		<result column="PROM_TITLE" property="promTitle"/>
+		<result column="PROM_CONTENT" property="promContent"/>
+		<result column="PROM_REG_DATE" property="promRegDate"/>
+		<result column="PROM_STATUS" property="promStatus"/>
+		<result column="CO_ID" property="coId"/>
+		<result column="CO_NAME" property="coName"/>
+		<result column="CO_TEL" property="coTel"/>
+  		<result column="CO_EMAIL" property="coEmail"/>
+		<result column="PROM_FILE_SEQ" property="promFileSeq" />
+		<result column="PROM_FILE_ORG_NAME" property="promFileOrgName" />
+		<result column="PROM_FILE_NAME" property="promFileName" />
+		<result column="PROM_FILE_EXT" property="promFileExt" />
+		<result column="PROM_SIZE" property="promFileSize" />
+		<result column="PROM_MO_SDATE" property="promMoSdate"/>
+		<result column="PROM_MO_EDATE" property="promMoEdate"/>
+		<result column="PROM_CO_SDATE" property="promCoSdate"/>
+		<result column="PROM_CO_EDATE" property="promCoEdate"/>
+		<result column="PROM_CATE" property="promCate"/>
+		<result column="PROM_ADDR" property="promAddr"/>
+		<result column="PROM_PRICE" property="promPrice"/>
+		<result column="PROM_JOIN_CNT" property="promJoinCnt"/>
+		<result column="PROM_LIMIT_CNT" property="promLimitCnt"/>
+		<result column="PROM_READ_CNT" property="promReadCnt"/>
+		<result column="PROM_LIKE_CNT" property="promLikeCnt"/>
+	</resultMap>
+	
+	<resultMap id="promFileResultMap" type="com.sist.withSports.model.PromFile">
+		<id column="PROM_SEQ" property="promSeq" />
+		<id column="PROM_FILE_SEQ" property="promFileSeq" />
+		<result column="PROM_FILE_ORG_NAME" property="promFileOrgName" />
+		<result column="PROM_FILE_NAME" property="promFileName" />
+		<result column="PROM_FILE_EXT" property="promFileExt" />
+		<result column="PROM_SIZE" property="promFileSize" />
+		<result column="PROM_FILE_SIZE" property="promRegDate" />
+  	</resultMap>
+  	
+  	<resultMap id="promLikeResultMap" type="com.sist.withSports.model.Like">
+		<id column="PROM_SEQ" property="promSeq" />
+		<id column="NM_ID" property="nmId"/>
+	</resultMap>
+  
+	<insert id="promInsert" parameterType="com.sist.withSports.model.Prom">
+		<selectKey resultType="long" keyProperty="promSeq" order="BEFORE">
+			SELECT SEQ_PROM_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO SP_PROM (
+		    PROM_SEQ,
+		    PROM_TITLE,
+		    PROM_CONTENT,
+		    PROM_REG_DATE,
+		    PROM_STATUS,
+		    CO_ID,
+		    PROM_MO_SDATE,
+		    PROM_MO_EDATE,
+		    PROM_CO_SDATE,
+		    PROM_CO_EDATE,
+		    PROM_CATE,
+		    PROM_ADDR,
+		    PROM_PRICE,
+		    PROM_JOIN_CNT,
+		    PROM_LIMIT_CNT,
+		    PROM_READ_CNT,
+		    PROM_LIKE_CNT
+		) VALUES (
+		    #{promSeq},
+		    #{promTitle},
+		    #{promContent},
+		    SYSDATE,
+		    #{promStatus},
+		    #{coId},
+		    TO_DATE(#{promMoSdate},'YYYY-MM-DD'),
+		    TO_DATE(#{promMoEdate},'YYYY-MM-DD'),
+		    TO_DATE(#{promCoSdate},'YYYY-MM-DD'),
+		    TO_DATE(#{promCoEdate},'YYYY-MM-DD'),
+		    #{promCate},
+		    #{promAddr},
+		    #{promPrice},
+		    0,
+		    #{promLimitCnt},
+		    0,
+		    0
+		)
+	</insert>
+	
+	<insert id="promFileInsert" parameterType="com.sist.withSports.model.PromFile">
+		INSERT INTO SP_PROM_FILE (
+		    PROM_SEQ,
+		    PROM_FILE_SEQ,
+		    PROM_FILE_ORG_NAME,
+		    PROM_FILE_NAME,
+		    PROM_FILE_EXT,
+		    PROM_FILE_SIZE,
+		    PROM_REG_DATE
+		) VALUES (
+		    #{promSeq},
+		    #{promFileSeq},
+		    #{promFileOrgName},
+		    #{promFileName},
+		    #{promFileExt},
+		    #{promFileSize},
+		    SYSDATE
+		)
+	</insert>
+	
+	<select id="promList" parameterType="com.sist.withSports.model.Prom" resultMap="promResultMap">
+		SELECT PROM_SEQ,
+		       PROM_TITLE,
+		       PROM_CONTENT,
+		       PROM_REG_DATE,
+		       PROM_STATUS,
+		       CO_ID,
+		       CO_NAME,
+               PROM_FILE_ORG_NAME,
+               PROM_FILE_NAME,
+               PROM_FILE_EXT,
+               PROM_FILE_SIZE,
+		       PROM_MO_SDATE,
+		       PROM_MO_EDATE,
+		       PROM_CO_SDATE,
+		       PROM_CO_EDATE,
+		       PROM_CATE,
+		       PROM_ADDR,
+		       PROM_PRICE,
+		       PROM_JOIN_CNT,
+		       PROM_LIMIT_CNT,
+		       PROM_READ_CNT,
+		       PROM_LIKE_CNT
+		  FROM (SELECT ROWNUM RNUM,
+		               PROM_SEQ,
+		               PROM_TITLE,
+		               PROM_CONTENT,
+		               PROM_REG_DATE,
+		               PROM_STATUS,
+		               CO_ID,
+		               CO_NAME,
+		               PROM_FILE_ORG_NAME,
+		               PROM_FILE_NAME,
+		               PROM_FILE_EXT,
+		               PROM_FILE_SIZE,
+		               PROM_MO_SDATE,
+		               PROM_MO_EDATE,
+		               PROM_CO_SDATE,
+		               PROM_CO_EDATE,
+		               PROM_CATE,
+		               PROM_ADDR,
+		               PROM_PRICE,
+		               PROM_JOIN_CNT,
+		               PROM_LIMIT_CNT,
+		               PROM_READ_CNT,
+		               PROM_LIKE_CNT
+		         FROM (SELECT NVL(A.PROM_SEQ, 0) PROM_SEQ,
+		                      NVL(A.PROM_TITLE, '') PROM_TITLE,
+		                      NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		                      NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		                      NVL(A.PROM_STATUS, '') PROM_STATUS,
+		                      NVL(A.CO_ID, '') CO_ID,
+		                      NVL(B.CO_NAME, '') CO_NAME,
+		                      NVL(C.PROM_FILE_ORG_NAME, '') PROM_FILE_ORG_NAME,
+		                      NVL(C.PROM_FILE_NAME, '') PROM_FILE_NAME,
+		                      NVL(C.PROM_FILE_EXT, '') PROM_FILE_EXT,
+		                      NVL(C.PROM_FILE_SIZE, '') PROM_FILE_SIZE,
+		                      NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY.MM.DD'),'') PROM_MO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY.MM.DD'),'') PROM_MO_EDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY.MM.DD'),'') PROM_CO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY.MM.DD'),'') PROM_CO_EDATE,
+		                      NVL(A.PROM_CATE, '') PROM_CATE,
+		                      NVL(A.PROM_ADDR, '') PROM_ADDR,
+		                      NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		                      NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		                      NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		                      NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		                      NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		                 FROM SP_PROM A, SP_CO_USER B, SP_PROM_FILE C
+		                WHERE A.CO_ID = B.CO_ID
+		                  AND A.PROM_SEQ = C.PROM_SEQ(+)
+		                  AND A.PROM_STATUS = 'Y'
+		 	<if test='searchType != null and searchType != "" and searchValue != null and searchValue != ""'>
+		    		<choose>
+		    		<when test='searchType == "1"'>
+		                  AND B.CO_NAME LIKE '%' || #{searchValue} || '%'
+	                </when>
+      				<when test='searchType == "2"'>
+		                  AND A.PROM_CATE LIKE '%' || #{searchValue} || '%'
+	                </when>
+      				<when test='searchType == "3"'>
+		                  AND A.PROM_TITLE LIKE '%' || #{searchValue} || '%'
+	                </when>
+      				</choose>
+    		</if>
+		                ORDER BY PROM_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+	       AND RNUM <![CDATA[<=]]> #{endRow}
+	</select>
+	
+	<select id="promListCnt" parameterType="com.sist.withSports.model.PromFile" resultType="long">
+		SELECT COUNT(PROM_SEQ) CNT
+		  FROM SP_PROM A, SP_CO_USER B
+		  WHERE A.CO_ID = B.CO_ID
+		    AND A.PROM_STATUS = 'Y'
+		    <if test='searchType != null and searchType != "" and searchValue != null and searchValue != ""'>
+	    		<choose>
+	    			<when test='searchType == "1"'>
+	                  AND B.CO_NAME LIKE '%' || #{searchValue} || '%'
+	            	</when>
+	    				<when test='searchType == "2"'>
+	                  AND A.PROM_CATE LIKE '%' || #{searchValue} || '%'
+	               </when>
+	    				<when test='searchType == "3"'>
+	                  AND A.PROM_TITLE LIKE '%' || #{searchValue} || '%'
+	               </when>
+	    		 </choose>
+    		</if>
+	</select>
+	
+	<select id="promFileSelect" parameterType="long" resultMap="promFileResultMap">
+		SELECT PROM_SEQ,
+		       PROM_FILE_SEQ,
+		       NVL(PROM_FILE_ORG_NAME, '') PROM_FILE_ORG_NAME,
+		       NVL(PROM_FILE_NAME, '') PROM_FILE_NAME,
+		       NVL(PROM_FILE_EXT, '') PROM_FILE_EXT,
+		       NVL(PROM_FILE_SIZE, '') PROM_FILE_SIZE,
+		       NVL(TO_CHAR(PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'), '') PROM_REG_DATE
+		  FROM SP_PROM_FILE
+		 WHERE PROM_SEQ = #{value}
+		   AND PROM_FILE_SEQ = 1
+	</select>
+	
+	<select id="promView" parameterType="long" resultMap="promResultMap">
+		SELECT PROM_SEQ,
+		       NVL(A.PROM_TITLE, '') PROM_TITLE,
+		       NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		       NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		       NVL(A.PROM_STATUS, '') PROM_STATUS,
+		       NVL(A.CO_ID, '') CO_ID,
+		       NVL(B.CO_NAME, '') CO_NAME,
+		       NVL(B.CO_TEL, '') CO_TEL,
+		       NVL(B.CO_EMAIL, '') CO_EMAIL,
+		       NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY-MM-DD'),'') PROM_MO_SDATE,
+		       NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY-MM-DD'),'') PROM_MO_EDATE,
+		       NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY-MM-DD'),'') PROM_CO_SDATE,
+		       NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY-MM-DD'),'') PROM_CO_EDATE,
+		       NVL(A.PROM_CATE, '') PROM_CATE,
+		       NVL(A.PROM_ADDR, '') PROM_ADDR,
+		       NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		       NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		       NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		       NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		       NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		  FROM SP_PROM A, SP_CO_USER B
+		 WHERE A.CO_ID = B.CO_ID
+		   AND A.PROM_STATUS = 'Y'
+		   AND A.PROM_SEQ = #{value}
+	</select> 
+	
+	<!-- 첨부파일 삭제 -->
+    <delete id="promFileDelete" parameterType="long">
+    	DELETE FROM SP_PROM_FILE
+ 		 WHERE PROM_SEQ = #{value}
+    </delete>
+  
+    <!-- 홍보게시글 업데이트 -->
+    <update id="promUpdate" parameterType="com.sist.withSports.model.Prom">
+ 		UPDATE SP_PROM
+		   SET PROM_TITLE = #{promTitle},
+		       PROM_CONTENT = #{promContent},
+		       PROM_MO_SDATE = TO_DATE(#{promMoSdate},'YYYY-MM-DD'),
+		       PROM_MO_EDATE = TO_DATE(#{promMoEdate},'YYYY-MM-DD'),
+		       PROM_CO_SDATE = TO_DATE(#{promCoSdate},'YYYY-MM-DD'),
+		       PROM_CO_EDATE = TO_DATE(#{promCoEdate},'YYYY-MM-DD'),
+		       PROM_CATE = #{promCate},
+		       PROM_ADDR = #{promAddr},
+		       PROM_LIMIT_CNT = #{promLimitCnt}
+		WHERE PROM_SEQ = #{promSeq}
+    </update>
+    
+    <!-- 조회수 증가 -->
+    <update id="promReadCntUp" parameterType="long">
+	  	UPDATE SP_PROM
+		   SET PROM_READ_CNT = PROM_READ_CNT + 1
+	 	 WHERE PROM_SEQ = #{value}
+  	</update>
+  	
+  	<!-- 홍보 좋아용~ -->
+    <insert id="promLikeInsert" parameterType="com.sist.withSports.model.Like">
+	  	INSERT INTO SP_LIKE (
+		    PROM_SEQ,
+		    NM_ID
+		) VALUES (
+		    #{promSeq},
+		    #{nmId}
+		)
+    </insert>
+    
+    <!-- 좋아요 증가 -->
+    <update id="promLikeCntUp" parameterType="com.sist.withSports.model.Prom">
+    	<selectKey resultType="long" keyProperty="promLikeCnt" order="BEFORE">
+			SELECT COUNT(NM_ID) FROM SP_LIKE WHERE PROM_SEQ = #{promSeq}
+		</selectKey>
+	  	UPDATE SP_PROM
+		   SET PROM_LIKE_CNT = #{promLikeCnt}
+		 WHERE PROM_SEQ = #{promSeq}
+  	</update>
+  	
+  	<!-- 좋아요 조회 -->
+  	<select id="promLikeSelect" parameterType="com.sist.withSports.model.Like" resultMap="promLikeResultMap">
+  		SELECT PROM_SEQ,
+		       NM_ID
+		  FROM SP_LIKE
+		 WHERE NM_ID = #{nmId}
+		   AND PROM_SEQ = #{promSeq}
+  	</select>
+  	
+   <delete id="promLikeDelete" parameterType="com.sist.withSports.model.Like">
+	  	DELETE FROM SP_LIKE
+		 WHERE PROM_SEQ = #{promSeq}
+		   AND NM_ID = #{nmId}
+    </delete>
+    
+    <!-- 좋아요 순 -->
+    <select id="promLikeList" parameterType="int" resultMap="promResultMap">
+    	SELECT PROM_SEQ,
+		       PROM_TITLE,
+		       PROM_CONTENT,
+		       PROM_REG_DATE,
+		       PROM_STATUS,
+		       CO_ID,
+		       CO_NAME,
+		       PROM_MO_SDATE,
+		       PROM_MO_EDATE,
+		       PROM_CO_SDATE,
+		       PROM_CO_EDATE,
+		       PROM_CATE,
+		       PROM_ADDR,
+		       PROM_PRICE,
+		       PROM_JOIN_CNT,
+		       PROM_LIMIT_CNT,
+		       PROM_READ_CNT,
+		       PROM_LIKE_CNT
+		  FROM (SELECT ROWNUM RNUM,
+		               PROM_SEQ,
+		               PROM_TITLE,
+		               PROM_CONTENT,
+		               PROM_REG_DATE,
+		               PROM_STATUS,
+		               CO_ID,
+		               CO_NAME,
+		               PROM_MO_SDATE,
+		               PROM_MO_EDATE,
+		               PROM_CO_SDATE,
+		               PROM_CO_EDATE,
+		               PROM_CATE,
+		               PROM_ADDR,
+		               PROM_PRICE,
+		               PROM_JOIN_CNT,
+		               PROM_LIMIT_CNT,
+		               PROM_READ_CNT,
+		               PROM_LIKE_CNT
+		         FROM (SELECT PROM_SEQ,
+		                      NVL(A.PROM_TITLE, '') PROM_TITLE,
+		                      NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		                      NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		                      NVL(A.PROM_STATUS, '') PROM_STATUS,
+		                      NVL(A.CO_ID, '') CO_ID,
+		                      NVL(B.CO_NAME, '') CO_NAME,
+		                      NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY.MM.DD'),'') PROM_MO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY.MM.DD'),'') PROM_MO_EDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY.MM.DD'),'') PROM_CO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY.MM.DD'),'') PROM_CO_EDATE,
+		                      NVL(A.PROM_CATE, '') PROM_CATE,
+		                      NVL(A.PROM_ADDR, '') PROM_ADDR,
+		                      NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		                      NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		                      NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		                      NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		                      NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		                 FROM SP_PROM A, SP_CO_USER B
+		                WHERE A.CO_ID = B.CO_ID
+		                ORDER BY PROM_LIKE_CNT DESC))
+		 WHERE RNUM <![CDATA[>=]]> 1
+		   AND RNUM <![CDATA[<=]]> 8
+    </select>
+    
+    <!-- 조회수 순 -->
+    <select id="promReadList" parameterType="int" resultMap="promResultMap">
+    	SELECT PROM_SEQ,
+		       PROM_TITLE,
+		       PROM_CONTENT,
+		       PROM_REG_DATE,
+		       PROM_STATUS,
+		       CO_ID,
+		       CO_NAME,
+		       PROM_MO_SDATE,
+		       PROM_MO_EDATE,
+		       PROM_CO_SDATE,
+		       PROM_CO_EDATE,
+		       PROM_CATE,
+		       PROM_ADDR,
+		       PROM_PRICE,
+		       PROM_JOIN_CNT,
+		       PROM_LIMIT_CNT,
+		       PROM_READ_CNT,
+		       PROM_LIKE_CNT
+		  FROM (SELECT ROWNUM RNUM,
+		               PROM_SEQ,
+		               PROM_TITLE,
+		               PROM_CONTENT,
+		               PROM_REG_DATE,
+		               PROM_STATUS,
+		               CO_ID,
+		               CO_NAME,
+		               PROM_MO_SDATE,
+		               PROM_MO_EDATE,
+		               PROM_CO_SDATE,
+		               PROM_CO_EDATE,
+		               PROM_CATE,
+		               PROM_ADDR,
+		               PROM_PRICE,
+		               PROM_JOIN_CNT,
+		               PROM_LIMIT_CNT,
+		               PROM_READ_CNT,
+		               PROM_LIKE_CNT
+		         FROM (SELECT PROM_SEQ,
+		                      NVL(A.PROM_TITLE, '') PROM_TITLE,
+		                      NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		                      NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		                      NVL(A.PROM_STATUS, '') PROM_STATUS,
+		                      NVL(A.CO_ID, '') CO_ID,
+		                      NVL(B.CO_NAME, '') CO_NAME,
+		                      NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY.MM.DD'),'') PROM_MO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY.MM.DD'),'') PROM_MO_EDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY.MM.DD'),'') PROM_CO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY.MM.DD'),'') PROM_CO_EDATE,
+		                      NVL(A.PROM_CATE, '') PROM_CATE,
+		                      NVL(A.PROM_ADDR, '') PROM_ADDR,
+		                      NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		                      NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		                      NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		                      NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		                      NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		                 FROM SP_PROM A, SP_CO_USER B
+		                WHERE A.CO_ID = B.CO_ID
+		                ORDER BY PROM_READ_CNT DESC))
+		 WHERE RNUM <![CDATA[>=]]> 1
+		   AND RNUM <![CDATA[<=]]> 8
+    </select>
+    
+    <!-- 최신 순 -->
+    <select id="promLeastList" parameterType="int" resultMap="promResultMap">
+    	SELECT PROM_SEQ,
+		       PROM_TITLE,
+		       PROM_CONTENT,
+		       PROM_REG_DATE,
+		       PROM_STATUS,
+		       CO_ID,
+		       CO_NAME,
+		       PROM_MO_SDATE,
+		       PROM_MO_EDATE,
+		       PROM_CO_SDATE,
+		       PROM_CO_EDATE,
+		       PROM_CATE,
+		       PROM_ADDR,
+		       PROM_PRICE,
+		       PROM_JOIN_CNT,
+		       PROM_LIMIT_CNT,
+		       PROM_READ_CNT,
+		       PROM_LIKE_CNT
+		  FROM (SELECT ROWNUM RNUM,
+		               PROM_SEQ,
+		               PROM_TITLE,
+		               PROM_CONTENT,
+		               PROM_REG_DATE,
+		               PROM_STATUS,
+		               CO_ID,
+		               CO_NAME,
+		               PROM_MO_SDATE,
+		               PROM_MO_EDATE,
+		               PROM_CO_SDATE,
+		               PROM_CO_EDATE,
+		               PROM_CATE,
+		               PROM_ADDR,
+		               PROM_PRICE,
+		               PROM_JOIN_CNT,
+		               PROM_LIMIT_CNT,
+		               PROM_READ_CNT,
+		               PROM_LIKE_CNT
+		         FROM (SELECT PROM_SEQ,
+		                      NVL(A.PROM_TITLE, '') PROM_TITLE,
+		                      NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		                      NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		                      NVL(A.PROM_STATUS, '') PROM_STATUS,
+		                      NVL(A.CO_ID, '') CO_ID,
+		                      NVL(B.CO_NAME, '') CO_NAME,
+		                      NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY.MM.DD'),'') PROM_MO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY.MM.DD'),'') PROM_MO_EDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY.MM.DD'),'') PROM_CO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY.MM.DD'),'') PROM_CO_EDATE,
+		                      NVL(A.PROM_CATE, '') PROM_CATE,
+		                      NVL(A.PROM_ADDR, '') PROM_ADDR,
+		                      NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		                      NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		                      NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		                      NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		                      NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		                 FROM SP_PROM A, SP_CO_USER B
+		                WHERE A.CO_ID = B.CO_ID
+		                ORDER BY PROM_REG_DATE DESC))
+		 WHERE RNUM <![CDATA[>=]]> 1
+		   AND RNUM <![CDATA[<=]]> 8
+    </select>
+    
+    <select id="myCoPromList" parameterType="com.sist.withSports.model.Prom" resultMap="promResultMap">
+		SELECT PROM_SEQ,
+		       PROM_TITLE,
+		       PROM_CONTENT,
+		       PROM_REG_DATE,
+		       PROM_STATUS,
+		       CO_ID,
+		       CO_NAME,
+               PROM_FILE_ORG_NAME,
+               PROM_FILE_NAME,
+               PROM_FILE_EXT,
+               PROM_FILE_SIZE,
+		       PROM_MO_SDATE,
+		       PROM_MO_EDATE,
+		       PROM_CO_SDATE,
+		       PROM_CO_EDATE,
+		       PROM_CATE,
+		       PROM_ADDR,
+		       PROM_PRICE,
+		       PROM_JOIN_CNT,
+		       PROM_LIMIT_CNT,
+		       PROM_READ_CNT,
+		       PROM_LIKE_CNT
+		  FROM (SELECT ROWNUM RNUM,
+		               PROM_SEQ,
+		               PROM_TITLE,
+		               PROM_CONTENT,
+		               PROM_REG_DATE,
+		               PROM_STATUS,
+		               CO_ID,
+		               CO_NAME,
+		               PROM_FILE_ORG_NAME,
+		               PROM_FILE_NAME,
+		               PROM_FILE_EXT,
+		               PROM_FILE_SIZE,
+		               PROM_MO_SDATE,
+		               PROM_MO_EDATE,
+		               PROM_CO_SDATE,
+		               PROM_CO_EDATE,
+		               PROM_CATE,
+		               PROM_ADDR,
+		               PROM_PRICE,
+		               PROM_JOIN_CNT,
+		               PROM_LIMIT_CNT,
+		               PROM_READ_CNT,
+		               PROM_LIKE_CNT
+		         FROM (SELECT NVL(A.PROM_SEQ, 0) PROM_SEQ,
+		                      NVL(A.PROM_TITLE, '') PROM_TITLE,
+		                      NVL(A.PROM_CONTENT, '') PROM_CONTENT,
+		                      NVL(TO_CHAR(A.PROM_REG_DATE, 'YYYY.MM.DD HH24:MI:SS'),'') PROM_REG_DATE,
+		                      NVL(A.PROM_STATUS, '') PROM_STATUS,
+		                      NVL(A.CO_ID, '') CO_ID,
+		                      NVL(B.CO_NAME, '') CO_NAME,
+		                      NVL(C.PROM_FILE_ORG_NAME, '') PROM_FILE_ORG_NAME,
+		                      NVL(C.PROM_FILE_NAME, '') PROM_FILE_NAME,
+		                      NVL(C.PROM_FILE_EXT, '') PROM_FILE_EXT,
+		                      NVL(C.PROM_FILE_SIZE, '') PROM_FILE_SIZE,
+		                      NVL(TO_CHAR(A.PROM_MO_SDATE, 'YYYY.MM.DD'),'') PROM_MO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_MO_EDATE, 'YYYY.MM.DD'),'') PROM_MO_EDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_SDATE, 'YYYY.MM.DD'),'') PROM_CO_SDATE,
+		                      NVL(TO_CHAR(A.PROM_CO_EDATE, 'YYYY.MM.DD'),'') PROM_CO_EDATE,
+		                      NVL(A.PROM_CATE, '') PROM_CATE,
+		                      NVL(A.PROM_ADDR, '') PROM_ADDR,
+		                      NVL(A.PROM_PRICE, 0) PROM_PRICE,
+		                      NVL(A.PROM_JOIN_CNT, 0) PROM_JOIN_CNT,
+		                      NVL(A.PROM_LIMIT_CNT, 0) PROM_LIMIT_CNT,
+		                      NVL(A.PROM_READ_CNT, 0) PROM_READ_CNT,
+		                      NVL(A.PROM_LIKE_CNT, 0) PROM_LIKE_CNT
+		                 FROM SP_PROM A, SP_CO_USER B, SP_PROM_FILE C
+		                WHERE A.CO_ID = B.CO_ID
+		                  AND A.PROM_SEQ = C.PROM_SEQ(+)
+		                  AND A.PROM_STATUS = 'Y'
+		                  AND A.CO_ID = #{coId}
+		                ORDER BY PROM_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+	       AND RNUM <![CDATA[<=]]> #{endRow}
+	</select>
+	
+	<select id="myCoPromListCnt" parameterType="String" resultType="long">
+		SELECT COUNT(PROM_SEQ) CNT
+		  FROM SP_PROM A, SP_CO_USER B
+		  WHERE A.CO_ID = B.CO_ID
+		    AND A.PROM_STATUS = 'Y'
+		    AND A.CO_ID = #{coId}
+	</select>
+</mapper>

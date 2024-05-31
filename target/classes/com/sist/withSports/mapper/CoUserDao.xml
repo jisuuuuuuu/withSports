@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.withSports.dao.CoUserDao">
+  <!--ResultMap -->
+  <resultMap id="coUserResultMap" type="com.sist.withSports.model.CoUser">
+  	<id column="CO_ID" property="coId" />
+  	<result column="CO_PWD" property="coPwd"/>
+  	<result column="CO_NAME" property="coName"/>
+  	<result column="CO_CEO" property="coCeo"/>
+  	<result column="CO_NUM" property="coNum"/>
+  	<result column="CO_ADDR" property="coAddr"/>
+  	<result column="CO_TEL" property="coTel"/>
+  	<result column="CO_EMAIL" property="coEmail"/>
+  	<result column="CO_DATE" property="coDate"/>
+  	<result column="CO_STATUS" property="coStatus"/>
+  </resultMap>
+  
+  <select id="coUserSelect" parameterType="String" resultMap="coUserResultMap">
+  	SELECT CO_ID,
+	       CO_PWD,
+	       CO_NAME,
+	       CO_CEO,
+	       CO_NUM,
+	       CO_ADDR,
+	       CO_TEL,
+	       CO_EMAIL,
+	       CO_DATE,
+	       CO_STATUS
+	  FROM SP_CO_USER
+	 WHERE CO_ID = #{value}
+  </select>
+  
+  <select id="coSameCheck" parameterType="com.sist.withSports.model.CoUser" resultType="long">
+  	SELECT COUNT(CO_ID) AS CNT
+	  FROM SP_CO_USER
+	  <choose>
+	  <when test='coId != null and coId != ""'>
+     WHERE CO_ID = #{coId}
+      </when>
+      <when test='coEmail != null and coEmail != ""'>
+	 WHERE CO_EMAIL = #{coEmail}
+	  </when>
+	  </choose>
+  </select>
+  
+  <insert id="coInsert" parameterType="com.sist.withSports.model.CoUser">
+  	INSERT INTO SP_CO_USER (
+	    CO_ID,
+	    CO_PWD,
+	    CO_NAME,
+	    CO_CEO,
+	    CO_NUM,
+	    CO_ADDR,
+	    CO_TEL,
+	    CO_EMAIL,
+	    CO_DATE,
+	    CO_STATUS
+	) VALUES (
+	    #{coId},
+	    #{coPwd},
+	    #{coName},
+	    #{coCeo},
+	    #{coNum},
+	    #{coAddr},
+	    #{coTel},
+	    #{coEmail},
+	    SYSDATE,
+	    #{coStatus}
+	)
+  </insert>
+</mapper>

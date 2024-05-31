@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.withSports.dao.NmUserDao">
+  <!--hiBoardResultMap -->
+  <resultMap id="nmUserResultMap" type="com.sist.withSports.model.NmUser">
+  	<id column="NM_ID" property="nmId" />
+  	<result column="NM_PWD" property="nmPwd"/>
+  	<result column="NM_NAME" property="nmName"/>
+  	<result column="NM_NICKNAME" property="nmNickname"/>
+  	<result column="NM_EMAIL" property="nmEmail"/>
+  	<result column="NM_TEL" property="nmTel"/>
+  	<result column="NM_DATE" property="nmDate"/>
+  	<result column="NM_STATUS" property="nmStatus"/>
+  </resultMap>
+  
+  <resultMap id="promLikeResultMap" type="com.sist.withSports.model.Like">
+	<id column="PROM_SEQ" property="promSeq" />
+	<id column="NM_ID" property="nmId"/>
+	<result column="PROM_TITLE" property="promTitle"/>
+	<result column="PROM_CO_SDATE" property="promCoSdate"/>
+	<result column="PROM_CO_EDATE" property="promCoEdate"/>
+	<result column="PROM_CATE" property="promCate"/>
+  </resultMap>
+  
+  <resultMap id="promJoinResultMap" type="com.sist.withSports.model.Join">
+	<id column="PROM_SEQ" property="promSeq" />
+	<id column="NM_ID" property="nmId"/>
+	<result column="PAY_DATE" property="payDate"/>
+	<result column="JOIN_STATUS" property="joinStatus"/>
+	<result column="PROM_TITLE" property="promTitle"/>
+	<result column="PROM_CO_SDATE" property="promCoSdate"/>
+	<result column="PROM_CO_EDATE" property="promCoEdate"/>
+	<result column="PROM_CATE" property="promCate"/>
+	
+  </resultMap>
+
+  <select id="nmUserSelect" parameterType="String" resultMap="nmUserResultMap">
+  	SELECT NM_ID,
+	       NM_PWD,
+	       NM_NAME,
+	       NM_NICKNAME,
+	       NM_EMAIL,
+	       NM_TEL,
+	       NM_DATE,
+	       NM_STATUS
+	  FROM SP_NM_USER
+	 WHERE NM_ID = #{value}
+  </select>
+  
+  <select id="nmSameCheck" parameterType="com.sist.withSports.model.NmUser" resultType="long">
+  	SELECT COUNT(NM_ID) AS CNT
+	  FROM SP_NM_USER
+	<if test='sameChkNum != null and sameChkNum != ""'>
+  		<choose>
+  		<when test='sameChkNum == "q"'>
+	WHERE NM_ID = #{nmValue}
+		</when>
+		<when test='sameChkNum == "w"'>
+	WHERE NM_NICKNAME = #{nmValue}
+	  	</when>
+		<when test='sameChkNum == "e"'>
+	WHERE NM_EMAIL = #{nmValue}
+	  	</when>
+		<when test='sameChkNum == "r"'>
+	WHERE NM_TEL = #{nmValue}
+	  	</when>
+	  	</choose>
+	 </if>
+  </select>
+  
+  <insert id="nmInsert" parameterType="com.sist.withSports.model.NmUser">
+  	INSERT INTO SP_NM_USER (
+	       NM_ID,
+	       NM_PWD,
+	       NM_NAME,
+	       NM_NICKNAME,
+	       NM_EMAIL,
+	       NM_TEL,
+	       NM_DATE,
+	       NM_STATUS)
+	VALUES (#{nmId},
+	        #{nmPwd},
+	        #{nmName},
+	        #{nmNickname},
+	        #{nmEmail},
+	        #{nmTel},
+	        SYSDATE,
+	        #{nmStatus})
+  </insert>
+  
+  <update id="nmUpdate" parameterType="com.sist.withSports.model.NmUser">
+  	UPDATE SP_NM_USER
+	   SET NM_PWD = #{nmPwd},
+	       NM_NAME = #{nmName},
+	       NM_NICKNAME = #{nmNickname},
+	       NM_EMAIL = #{nmEmail},
+	       NM_TEL = #{nmTel}
+	 WHERE NM_ID = #{nmId}
+  </update>
+  
+  <update id="nmTaltuie" parameterType="String">
+  	UPDATE SP_NM_USER
+	   SET NM_STATUS = 'T'
+	 WHERE NM_ID = #{value}
+  </update>
+  
+  <select id="myLikeList" parameterType="com.sist.withSports.model.Like" resultMap="promLikeResultMap">
+  	SELECT PROM_SEQ,
+	       NM_ID,
+	       PROM_TITLE,
+	       PROM_CATE,
+	       PROM_CO_SDATE,
+	       PROM_CO_EDATE
+	  FROM (SELECT ROWNUM RNUM,
+	       PROM_SEQ,
+	       NM_ID,
+	       PROM_TITLE,
+	       PROM_CATE,
+	       PROM_CO_SDATE,
+	       PROM_CO_EDATE
+	  FROM (SELECT A.PROM_SEQ,
+	               A.NM_ID,
+	               NVL(B.PROM_TITLE, '') PROM_TITLE,
+	               NVL(B.PROM_CATE, '') PROM_CATE,
+	               NVL(TO_CHAR(PROM_CO_SDATE, 'YYYY.MM.DD'), '') PROM_CO_SDATE,
+	               NVL(TO_CHAR(PROM_CO_EDATE, 'YYYY.MM.DD'), '') PROM_CO_EDATE
+	          FROM SP_LIKE A, SP_PROM B
+	         WHERE A.PROM_SEQ = B.PROM_SEQ
+	           AND NM_ID = #{nmId}
+	         ORDER BY PROM_SEQ DESC))
+	 WHERE RNUM <![CDATA[>=]]> #{startRow}
+	   AND RNUM <![CDATA[<=]]> #{endRow}
+  </select>
+  
+  <select id="myLikeListcNT" parameterType="String" resultType="long">
+	SELECT COUNT(PROM_SEQ) CNT
+	  FROM SP_LIKE
+	 WHERE NM_ID = #{value}
+  </select>
+  
+  <!-- 신청하기 -->
+  <insert id="promJoinInsert" parameterType="com.sist.withSports.model.Join">
+  	INSERT INTO SP_JOIN (
+	    PROM_SEQ,
+	    NM_ID,
+	    JOIN_STATUS
+	) VALUES (
+	    #{promSeq},
+	    #{nmId},
+	    #{joinStatus}
+	)
+  </insert>
+  
+  
+  <!-- 참가 조회 -->
+  <select id="promJoinSelect" parameterType="com.sist.withSports.model.Join" resultMap="promJoinResultMap">
+  	SELECT PROM_SEQ,
+	       NM_ID,
+	       PAY_DATE,
+	       JOIN_STATUS
+	  FROM SP_JOIN
+	 WHERE PROM_SEQ = #{promSeq}
+	   AND NM_ID = #{nmId}
+  </select>
+  
+  <select id="myJoinList" parameterType="com.sist.withSports.model.Join" resultMap="promJoinResultMap">
+  	SELECT PROM_SEQ,
+	       NM_ID,
+	       PROM_TITLE,
+	       PROM_CATE,
+	       PROM_CO_SDATE,
+	       PROM_CO_EDATE,
+	       JOIN_STATUS
+	  FROM (SELECT ROWNUM RNUM,
+	       PROM_SEQ,
+	       NM_ID,
+	       PROM_TITLE,
+	       PROM_CATE,
+	       PROM_CO_SDATE,
+	       PROM_CO_EDATE,
+	       JOIN_STATUS
+	  FROM (SELECT A.PROM_SEQ,
+	               A.NM_ID,
+	               NVL(B.PROM_TITLE, '') PROM_TITLE,
+	               NVL(B.PROM_CATE, '') PROM_CATE,
+	               NVL(TO_CHAR(PROM_CO_SDATE, 'YYYY.MM.DD'), '') PROM_CO_SDATE,
+	               NVL(TO_CHAR(PROM_CO_EDATE, 'YYYY.MM.DD'), '') PROM_CO_EDATE,
+	               NVL(A.JOIN_STATUS, '') JOIN_STATUS
+	          FROM SP_JOIN A, SP_PROM B
+	         WHERE A.PROM_SEQ = B.PROM_SEQ
+	           AND NM_ID = #{nmId}
+	         ORDER BY PROM_SEQ DESC))
+	 WHERE RNUM <![CDATA[>=]]> #{startRow}
+	   AND RNUM <![CDATA[<=]]> #{endRow}
+  </select>
+  
+  <!-- 참가 갯수 -->
+  <select id="myJoinCnt" parameterType="String" resultType="long">
+  	SELECT COUNT(PROM_SEQ)
+	  FROM SP_JOIN
+	 WHERE NM_ID = #{value}
+  </select>
+  
+  <update id="promJoinCntUp" parameterType="com.sist.withSports.model.Prom">
+  <selectKey resultType="long" keyProperty="promJoinCnt" order="BEFORE">
+      SELECT COUNT(NM_ID) FROM SP_JOIN WHERE PROM_SEQ = #{promSeq}
+  </selectKey>
+	  UPDATE SP_PROM
+	     SET PROM_JOIN_CNT = #{promJoinCnt}
+	   WHERE PROM_SEQ = #{promSeq}
+  </update>
+  
+  <delete id="joinDelete" parameterType="com.sist.withSports.model.Join">
+  	DELETE FROM SP_JOIN
+	 WHERE PROM_SEQ = #{promSeq}
+	  AND NM_ID = #{nmId}
+  </delete>
+  
+  <!-- 결제완료 상태 업데이트 -->
+  <update id="joinPaySuccess" parameterType="com.sist.withSports.model.Join">
+  	UPDATE SP_JOIN
+	  SET JOIN_STATUS = 'Y',
+	      PAY_DATE = SYSDATE
+	WHERE PROM_SEQ = #{promSeq}
+	  AND NM_ID = #{nmId}
+  </update>
+
+  <!-- 아이디 비번 찾기 -->
+  <select id="nmFind" parameterType="String" resultMap="nmUserResultMap">
+  	SELECT NM_ID,
+	       NM_PWD,
+	       NM_NAME,
+	       NM_NICKNAME,
+	       NM_EMAIL,
+	       NM_TEL,
+	       NM_DATE,
+	       NM_STATUS
+	  FROM SP_NM_USER
+	 WHERE NM_EMAIL = #{value}
+  </select>
+  
+  <update id="nmPwdFindIm" parameterType="com.sist.withSports.model.NmUser">
+  	UPDATE SP_NM_USER
+	SET NM_PWD = #{nmPwd}
+	WHERE NM_ID = #{nmId}
+  </update>
+</mapper>
